@@ -14,7 +14,7 @@ Aplikasi profil sederhana menggunakan Jetpack Compose.
 - Tombol Follow interaktif
 
 ## Screenshot
-![Screenshot](screenshot.png)
+![Screenshot](SS.png)
 
 ## Composable Functions
 1. `ProfileHeader` — header dengan foto & nama

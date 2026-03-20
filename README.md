@@ -18,8 +18,9 @@ Pengembangan dari tugas minggu 3. Aplikasi profil sederhana menggunakan Jetpack 
 
 ## Screenshot
 ![Profile Screen](SS.png)
-![Edit Profile](SS2.png)
-![Dark Mode](SS3.png)
+![Darkmode](SS1.png)
+![Edit profile](SS2.png)
+![Hasil edit profile](SS3.png)
 
 ## Composable Functions
 1. `ProfileHeader` — header dengan foto, nama & bio

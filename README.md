@@ -17,10 +17,10 @@ Pengembangan dari tugas minggu 3. Aplikasi profil sederhana menggunakan Jetpack 
 - **[Baru]** MVVM Pattern: state dikelola lewat ProfileViewModel dengan StateFlow
 
 ## Screenshot
-![Profile Screen](SS.png)
-![Darkmode](SS1.png)
-![Edit profile](SS2.png)
-![Hasil edit profile](SS3.png)
+<img src="SS.png" width="300">
+<img src="SS1.png" width="300">
+<img src="SS2.png" width="300">
+<img src="SS3.png" width="300">
 
 ## Composable Functions
 1. `ProfileHeader` — header dengan foto, nama & bio

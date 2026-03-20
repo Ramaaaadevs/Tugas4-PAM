@@ -23,77 +23,51 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-
-// DATA CLASS: ProfileInfo
-// Menyimpan seluruh data profil pengguna dalam satu struktur.
-// Penggunaan data class memungkinkan penyimpanan data yang
-// bersifat immutable (tidak berubah setelah dibuat), sehingga
-// lebih aman digunakan dalam UI yang bersifat deklaratif.
-
-
-data class ProfileInfo(
-    val nama: String,       // Nama lengkap pengguna
-    val bio: String,        // Deskripsi singkat / bio
-    val email: String,      // Alamat email
-    val phone: String,      // Nomor telepon
-    val location: String    // Lokasi / institusi
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.diwan.myprofileapp.viewmodel.ProfileViewModel
 
 
 // COMPOSABLE 1: ProfileHeader
-//
-// Fungsi ini untuk menampilkan bagian atas (header) dari halaman profil, mencakup foto profil berbentuk lingkaran, nama pengguna, dan bio singkat.
-// Parameter:
-//   - nama : String → nama yang akan ditampilkan
-//   - bio  : String → deskripsi singkat pengguna
+// Menampilkan bagian atas halaman profil: avatar, nama, dan bio.
+// Header tetap pakai warna biru — tidak terpengaruh dark mode
+// karena sudah gelap dari sananya.
 
 
 @Composable
 fun ProfileHeader(nama: String, bio: String) {
-
-    // Box digunakan sebagai container utama header.
-    // fillMaxWidth() untuk header biar bisa menuhin layar
-    // background gradient memberikan efek warna dari biru tua ke biru sedang,
-    // padding vertical memberi jarak atas-bawah konten di dalam header.
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1A237E), // Warna biru tua (atas)
-                        Color(0xFF283593)  // Warna biru sedang (bawah)
+                        Color(0xFF1A237E),
+                        Color(0xFF283593)
                     )
                 )
             )
             .padding(vertical = 32.dp),
-        contentAlignment = Alignment.Center // Seluruh konten di-center
+        contentAlignment = Alignment.Center
     ) {
-        // Column untuk profil, nama, bio, secara vertikal
-        // dengan jarak antar elemen sebesar 12.dp
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            // Foto profil menggunakan box berbentuk lingkaran Karena tidak menggunakan gambar asli, digantikan dengan Icon
             Box(
                 modifier = Modifier
-                    .size(100.dp)           // Ukuran kotak 100x100dp
-                    .clip(CircleShape)      // Dipotong menjadi bentuk lingkaran
-                    .background(Color(0xFF5C6BC0)), // Warna latar avatar
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF5C6BC0)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Person, // Icon orang sebagai avatar
+                    imageVector = Icons.Default.Person,
                     contentDescription = "Foto Profil",
                     tint = Color.White,
                     modifier = Modifier.size(60.dp)
                 )
             }
 
-            // Menampilkan nama pengguna dengan ukuran font 24sp dan bold
             Text(
                 text = nama,
                 fontSize = 24.sp,
@@ -101,12 +75,10 @@ fun ProfileHeader(nama: String, bio: String) {
                 color = Color.White
             )
 
-            // Menampilkan bio dengan warna lebih redup agar terlihat
-            // sebagai informasi sekunder di bawah nama
             Text(
                 text = bio,
                 fontSize = 14.sp,
-                color = Color(0xFFB0BEC5),      // Abu-abu kebiruan
+                color = Color(0xFFB0BEC5),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
@@ -116,60 +88,47 @@ fun ProfileHeader(nama: String, bio: String) {
 
 
 // COMPOSABLE 2: InfoItem
-//
-// Fungsi reusable untuk menampilkan satu baris informasi kontak, terdiri dari icon, label (judul), dan value (isi).
-// dipake biar bisa digunakan berulang kali untuk email,Phone, maupun Location tanpa perlu membuat fungsi terpisah.
-//
-// Parameter:
-//   - icon  : ImageVector → icon Material yang ditampilkan di kiri
-//   - label : String      → judul informasi (contoh: "Email")
-//   - value : String      → isi informasi (contoh: "diwan.123140116@student.itera.ac.id)
+// Komponen reusable untuk satu baris informasi kontak (icon + label + value).
+// Ditambah parameter textColor agar bisa menyesuaikan dark mode dari parent.
 
 
 @Composable
-fun InfoItem(icon: ImageVector, label: String, value: String) {
-
-    // Row menyusun icon dan teks secara horizontal dengan alignment vertikal di tengah biar rapih.
+fun InfoItem(icon: ImageVector, label: String, value: String, textColor: Color = Color(0xFF212121)) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        // Wadah icon berbentuk lingkaran dengan latar warna biru muda.
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE8EAF6)), // Biru muda sebagai latar icon
+                .background(Color(0xFFE8EAF6)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = Color(0xFF3949AB), // Warna icon biru gelap
+                tint = Color(0xFF3949AB),
                 modifier = Modifier.size(20.dp)
             )
         }
 
-        // Spacer  jarak horizontal antara icon dan teks
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Column  label dan value secara vertikal di sebelah kanan icon
         Column {
-            // Label ditampilkan kecil dan abu-abu sebagai judul informasi
             Text(
                 text = label,
                 fontSize = 12.sp,
                 color = Color.Gray,
                 fontWeight = FontWeight.Medium
             )
-            // Value ditampilkan lebih besar dan tebal sebagai isi informasi
+            // Warna teks value ngikutin textColor dari parent
             Text(
                 text = value,
                 fontSize = 15.sp,
-                color = Color(0xFF212121),
+                color = textColor,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -178,24 +137,28 @@ fun InfoItem(icon: ImageVector, label: String, value: String) {
 
 
 // COMPOSABLE 3: ProfileCard
-// Fungsi ini menampilkan kartu untuk informasi user. Di dalamnya memanggil InfoItem sebanyak 3 kali menggunakan composable yang reusebale
-// Parameter:
-//   - info : ProfileInfo → objek data berisi semua informasi profil
+// Ditambah parameter cardColor dan textColor agar card bisa
+// menyesuaikan tampilan saat dark mode aktif.
 
 
 @Composable
-fun ProfileCard(info: ProfileInfo) {
+fun ProfileCard(
+    email: String,
+    phone: String,
+    location: String,
+    cardColor: Color = Color.White,
+    textColor: Color = Color(0xFF212121)
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp),                          // Sudut melengkung 16dp
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Bayangan tipis
-        colors = CardDefaults.cardColors(containerColor = Color.White)   // Latar putih
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
 
-            // Judul kartu
             Text(
                 text = "Informasi Kontak",
                 fontSize = 16.sp,
@@ -204,86 +167,130 @@ fun ProfileCard(info: ProfileInfo) {
             )
 
             Spacer(modifier = Modifier.height(4.dp))
-
-            // Garis pemisah antara judul dan daftar informasi
             HorizontalDivider(color = Color(0xFFE0E0E0))
-
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Memanggil InfoItem 3 kali dengan data yang berbeda pake satu fungsi dipakai berulang tanpa duplicate kode.
-            InfoItem(icon = Icons.Default.Email,      label = "Email",    value = info.email)
-            InfoItem(icon = Icons.Default.Phone,      label = "Phone",    value = info.phone)
-            InfoItem(icon = Icons.Default.LocationOn, label = "Location", value = info.location)
+            // textColor di-pass ke InfoItem agar value teks ikut berubah
+            InfoItem(icon = Icons.Default.Email,      label = "Email",    value = email,    textColor = textColor)
+            InfoItem(icon = Icons.Default.Phone,      label = "Phone",    value = phone,    textColor = textColor)
+            InfoItem(icon = Icons.Default.LocationOn, label = "Location", value = location, textColor = textColor)
         }
     }
 }
 
+
 // MAIN SCREEN: ProfileScreen
-// composable utama tampilan. semua composable di atas dijadiin satu halaman profil yang lengkap. Dipanggil langsung dari MainActivity.
+// Penambahan dari versi sebelumnya:
+//   - bgColor, cardColor, textColor ditentukan berdasarkan isDarkMode
+//   - Semua komponen di bawah header menerima warna yang sesuai
+
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    viewModel: ProfileViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var showEditScreen by remember { mutableStateOf(false) }
 
-    // Mendefinisikan data profil pengguna menggunakan data class ProfileInfo.
-    // Dengan memusatkan data di sini, perubahan data cukup dilakukan
-    // di satu tempat saja.
-    val profile = ProfileInfo(
-        nama     = "Diwan Ramadhani Dwi Putra",
-        bio      = "Mahasiswa Semester 6 Teknik Informatika\nInstitut Teknologi Sumatera",
-        email    = "diwan.123140116@student.itera.ac.id",
-        phone    = "081278437207",
-        location = "Institut Teknologi Sumatera, Lampung"
-    )
+    // Variabel warna berdasarkan state isDarkMode dari ViewModel.
+    // Semua warna ditentukan di sini agar konsisten di seluruh halaman.
+    val bgColor   = if (uiState.isDarkMode) Color(0xFF121212) else Color(0xFFF5F5F5)
+    val cardColor = if (uiState.isDarkMode) Color(0xFF1E1E1E) else Color.White
+    val textColor = if (uiState.isDarkMode) Color.White else Color(0xFF212121)
 
-    // remember + mutableStateOf digunakan untuk menyimpan state tombol Follow.
-    // Ketika nilai isFollowing berubah, Compose akan otomatis me-recompose
-    // (menggambar ulang) bagian UI yang bergantung pada state ini.
-    var isFollowing by remember { mutableStateOf(false) }
+    if (showEditScreen) {
+        EditProfileScreen(
+            currentNama = uiState.nama,
+            currentBio = uiState.bio,
+            onSave = { nama, bio -> viewModel.saveProfile(nama, bio) },
+            onBack = { showEditScreen = false }
+        )
+        return
+    }
 
-    // Column utama sebagai wadah seluruh konten halaman.
-    // verticalScroll memungkinkan halaman di-scroll jika konten melebihi layar.
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5)) // Latar abu-abu sangat muda
+            .background(bgColor)
             .verticalScroll(rememberScrollState())
     ) {
 
-        // Memanggil ProfileHeader untuk menampilkan bagian atas halaman
-        ProfileHeader(nama = profile.nama, bio = profile.bio)
+        ProfileHeader(nama = uiState.nama, bio = uiState.bio)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Memanggil ProfileCard untuk menampilkan informasi kontak
-        ProfileCard(info = profile)
+        ProfileCard(
+            email     = uiState.email,
+            phone     = uiState.phone,
+            location  = uiState.location,
+            cardColor = cardColor,
+            textColor = textColor
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Row berisi dua tombol yang tersusun horizontal
+
+        // DARK MODE TOGGLE
+        // Card dan teks label ikut berubah warna sesuai mode aktif.
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (uiState.isDarkMode) "Dark Mode" else "Light Mode",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textColor
+                )
+                Switch(
+                    checked = uiState.isDarkMode,
+                    onCheckedChange = { viewModel.toggleDarkMode() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF1A237E)
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        // TOMBOL FOLLOW, PESAN, dan EDIT PROFILE
+        // Tidak ada perubahan dari versi sebelumnya.
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Tombol Follow bersifat interaktif — warnanya berubah
-            // berdasarkan state isFollowing (contoh penggunaan state di Compose)
             Button(
-                onClick = { isFollowing = !isFollowing }, // Toggle state
-                modifier = Modifier.weight(1f),           // Mengisi setengah lebar
+                onClick = { viewModel.toggleFollow() },
+                modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    // Warna berbeda tergantung kondisi isFollowing
-                    containerColor = if (isFollowing) Color(0xFF5C6BC0) else Color(0xFF1A237E)
+                    containerColor = if (uiState.isFollowing) Color(0xFF5C6BC0) else Color(0xFF1A237E)
                 )
             ) {
                 Text(
-                    text = if (isFollowing) "Following ✓" else "Follow",
+                    text = if (uiState.isFollowing) "Following ✓" else "Follow",
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            // Tombol Pesan menggunakan OutlinedButton (tanpa latar, hanya garis tepi)
             OutlinedButton(
                 onClick = { },
                 modifier = Modifier.weight(1f),
@@ -291,6 +298,18 @@ fun ProfileScreen() {
             ) {
                 Text(text = "Pesan", fontWeight = FontWeight.Bold)
             }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = { showEditScreen = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(text = "Edit Profile", fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
